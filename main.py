@@ -3,7 +3,7 @@ class Character:
         self.name = name
         self.hp = 10 
 
-def attack(self, other):
+    def attack(self, other):
         if self.hp > 0:
             other.hp -= 1
             print(f"{self.name} attaque {other.name}!")
@@ -14,3 +14,6 @@ def attack(self, other):
                 print(f"{other.name} a maintenant {other.hp} HP.")
         else:
             print(f"{self.name} ne peut pas attaquer car il est mort.")
+
+character1 = Character("David")
+character2 = Character("Goliath")
