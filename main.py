@@ -1,3 +1,6 @@
+import time
+import random
+
 class Character:
     def __init__(self, name):
         self.name = name
@@ -17,3 +20,22 @@ class Character:
 
 character1 = Character("David")
 character2 = Character("Goliath")
+
+turn_counter = 1
+
+while character1.hp > 0 and character2.hp > 0:
+    print(f"\n--- Turn {turn_counter} ---")
+    
+    attacker = random.choice([character1, character2])
+    defender = character2 if attacker == character1 else character1
+    
+    attacker.attack(defender)
+    
+    time.sleep(1) 
+
+    turn_counter += 1
+
+if character1.hp != 0:
+    print("The winner is David")
+else:
+    print("The winner is Goliath")
