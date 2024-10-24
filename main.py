@@ -9,10 +9,10 @@ class Character:
     def attack(self, other):
         if self.hp > 0:
             other.hp -= 1
-            print(f"{self.name} attaque {other.name}!")
+            print(f"{self.name} attaque {other.name} !")
             if other.hp <= 0:
                 other.hp = 0
-                print(f"{other.name} est mort!")
+                print(f"{other.name} est mort !")
             else:
                 print(f"{other.name} a maintenant {other.hp} HP.")
         else:
@@ -24,7 +24,7 @@ character2 = Character("Goliath")
 turn_counter = 1
 
 while character1.hp > 0 and character2.hp > 0:
-    print(f"\n--- Turn {turn_counter} ---")
+    print(f"\n--- Tour n°{turn_counter} ---")
     
     attacker = random.choice([character1, character2])
     defender = character2 if attacker == character1 else character1
@@ -36,6 +36,6 @@ while character1.hp > 0 and character2.hp > 0:
     turn_counter += 1
 
 if character1.hp != 0:
-    print("The winner is David")
+    print("Le vainqueur est David !")
 else:
-    print("The winner is Goliath")
+    print("Le vainqueur est Goliath !")
