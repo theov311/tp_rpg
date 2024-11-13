@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.x'
 
@@ -31,7 +31,7 @@ jobs:
     if: success()
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Fast-forward master branch
         run: |
@@ -46,12 +46,16 @@ jobs:
     if: failure()
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Create failure branch
+      - name: Ensure dev branch is up to date
         run: |
           git fetch origin
           git checkout dev
+          git pull origin dev
+
+      - name: Create failure branch
+        run: |
           failure_branch="failure/$(date +%s)"
           git branch $failure_branch
           git push origin $failure_branch
