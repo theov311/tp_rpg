@@ -19,7 +19,7 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m unittest discover -s tests -v
+          python -m unittest discover -s test.py -v
 
   merge-to-master:
     runs-on: ubuntu-latest
