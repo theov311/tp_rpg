@@ -23,7 +23,7 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m unittest discover -s tests
+          python -m unittest discover -s tests -v
 
   merge-to-master:
     runs-on: ubuntu-latest
@@ -52,12 +52,11 @@ jobs:
         run: |
           git fetch origin
           git checkout dev
-          git pull origin dev
+          git reset --hard origin/dev
 
       - name: Create failure branch
         run: |
           failure_branch="failure/$(date +%s)"
           git branch $failure_branch
           git push origin $failure_branch
-          git reset --hard HEAD@{1}
           git push origin dev --force
