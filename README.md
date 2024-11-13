@@ -10,3 +10,4 @@ On utilise GitHub Actions comme CI/CD :
 
 Points négatifs:
 - La gestion des secrets dans GitHub Actions peut poser des risques de sécurité si les workflows ne sont pas configurés correctement.
+- Limite de l'offre gratuite : Les workflows sont limités en termes de temps d'exécution par mois et de ressources matérielles (mémoire, CPU, etc.).
