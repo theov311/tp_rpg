@@ -3,7 +3,7 @@ Groupe Théo VERSACE et Alexis SELY
 On utilise GitHub Actions comme CI/CD :
 - On peut spécifier des actions précises à chaque étape du développement (build, test, déploiement, etc.)
 - Possibilité d'automatiser des tâches répétitives comme les tests et la vérification de code.
-- Intégration de données dans le cloud
+- Facilité de prise en main grâce aux templates de workflow et la documentation.
 - On peut suivre les étapes des workflows en temps réel, aidant à diagnostiquer les problèmes plus rapidement en cas d'erreurs.
 - Travail collaboratif
 - Habitude d'utilisation donc bonne aisance sur l'outil
