@@ -38,4 +38,4 @@ while character1.hp > 0 and character2.hp > 0:
 if character1.hp != 0:
     print("Le vainqueur est David !")
 else:
-    print("Le vainqueur est Goliath ! teeeeessst")
+    print("Le vainqueur est Goliath !")
