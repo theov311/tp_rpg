@@ -45,7 +45,7 @@ jobs:
         run: |
           git fetch origin
           git checkout master
-          git pull origin master --rebase  # Réalise un rebase pour éviter les merges inutiles
+          git pull origin master --rebase
           git push origin master
 
   failure-recovery:
