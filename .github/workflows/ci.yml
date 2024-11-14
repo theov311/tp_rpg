@@ -19,12 +19,12 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m unittest discover -s test.py -v
+          python -m unittest discover -s tests -v  # Assurez-vous que 'tests' est le bon dossier des tests
 
   merge-to-master:
     runs-on: ubuntu-latest
     needs: dev-branches
-    if: success()
+    if: ${{ success() }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -39,7 +39,7 @@ jobs:
   failure-recovery:
     runs-on: ubuntu-latest
     needs: dev-branches
-    if: failure()
+    if: ${{ failure() }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -53,6 +53,6 @@ jobs:
       - name: Create failure branch
         run: |
           failure_branch="failure/$(date +%s)"
-          git branch $failure_branch
+          git checkout -b $failure_branch
           git push origin $failure_branch
           git push origin dev --force
