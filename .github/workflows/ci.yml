@@ -38,14 +38,14 @@ jobs:
         run: |
           git fetch origin
           git checkout master
-          git merge dev --allow-unrelated-histories || echo "Merge failed, skipping"
+          git merge dev --allow-unrelated-histories  # Permet de fusionner les branches même avec des historiques différents
           git push origin master
 
       - name: Ensure master is up-to-date before pushing
         run: |
           git fetch origin
           git checkout master
-          git pull origin master
+          git pull origin master --rebase  # Réalise un rebase pour éviter les merges inutiles
           git push origin master
 
   failure-recovery:
@@ -55,11 +55,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Set Git user name and email
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
 
       - name: Ensure dev branch is up to date
         run: |
