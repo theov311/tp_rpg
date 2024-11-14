@@ -23,8 +23,8 @@ jobs:
           python -m unittest discover -s tests -v  # Lance les tests unitaires dans le dossier 'tests'
 
   merge-to-master:
-    if: ${{ success() }}  # Exécute cette étape seulement si les tests sont réussis
     runs-on: ubuntu-latest
+    if: ${{ success() }}  # Exécute cette étape seulement si les tests sont réussis
 
     steps:
       - name: Checkout repository
