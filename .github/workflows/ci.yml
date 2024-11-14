@@ -19,7 +19,7 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m unittest discover -s tests -v  # Assurez-vous que 'tests' est le bon dossier des tests
+          python -m unittest discover -s tests -v
 
   merge-to-master:
     runs-on: ubuntu-latest
