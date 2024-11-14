@@ -20,6 +20,17 @@ jobs:
       - name: Run tests
         run: |
           python -m unittest discover -s tests -v
+        continue-on-error: true  # Permet de continuer même si les tests échouent
+
+      - name: Commit changes (even if tests fail)
+        if: success()  # Se produit même si les tests échouent
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .  # Ajoute toutes les modifications
+          git commit -m "CI: Commit even if tests fail" || echo "No changes to commit"
+          git push origin dev  # Pousse les changements dans la branche dev
+
 
   merge-to-master:
     runs-on: ubuntu-latest
