@@ -3,31 +3,30 @@ name: CI Pipeline
 on:
   push:
     branches:
-      - dev  # Exécute le workflow lors d'un commit sur la branche dev
+      - dev
 
 jobs:
   dev-branch:
-    runs-on: ubuntu-latest  # Exécute sur la dernière version d'Ubuntu
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3  # Récupère le code du dépôt
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3  # Configure Python (pour un projet Python)
+      - name: Setup Python
+        uses: actions/setup-python@v3
         with:
-          python-version: '3.x'  # Spécifiez la version de Python
+          python-version: '3.x'
 
       - name: Run tests
         run: |
-          python -m unittest discover -s tests -v  # Lance les tests unitaires dans le dossier 'tests'
+          python -m unittest discover -s tests -v
 
   merge-to-master:
     runs-on: ubuntu-latest
-    if: ${{ success() }}  # Exécute cette étape seulement si les tests sont réussis
-
+    needs: dev-branch
+    if: ${{ success() }}
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set Git user name and email
@@ -35,31 +34,42 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-      - name: Fast-forward merge to master
+      - name: Fetch all branches
         run: |
-          git fetch origin
+          git fetch --all  # Assurez-vous que toutes les branches sont à jour
+
+      - name: Show branch status
+        run: |
+          git status  # Vérifiez l'état actuel des branches
+          git log --oneline --graph --decorate  # Visualisez l'historique des commits
+
+      - name: Fast-forward master branch
+        run: |
           git checkout master
-          git merge --ff-only dev  # Fast-forward merge de dev vers master
-          git push origin master  # Pousse les changements vers master
+          git pull origin master --rebase  # Réalisez un rebase pour garantir que master est à jour avant la fusion
+          git merge dev --allow-unrelated-histories || (echo "Merge failed, investigating"; exit 1)
 
   failure-recovery:
-    if: failure()  # Exécute cette étape si les tests échouent
     runs-on: ubuntu-latest
-
+    needs: dev-branch
+    if: ${{ failure() }}
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
-    
-      - name: Set Git user name and email
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
 
-      - name: Create a failure branch
+      - name: Log error information
         run: |
-          FAILURE_BRANCH="failures/$(date +%s)"  # Crée un nom unique pour la branche de failure basé sur le timestamp
-          git checkout -b $FAILURE_BRANCH  # Crée une nouvelle branche pour le commit échoué
-          git commit --amend --no-edit  # Annule le dernier commit échoué sans modification
-          git push origin $FAILURE_BRANCH  # Pousse la branche de failure vers le dépôt
-          git reset HEAD@{1}  # Annule le dernier commit échoué sur la branche dev
-          git push origin dev --force  # Force le push pour retirer le commit échoué de la branche dev
+          echo "CI pipeline failed. Checking last 10 commits."
+          git log -n 10 --oneline  # Affiche les derniers commits pour mieux comprendre la situation
+
+      - name: Ensure dev branch is up to date
+        run: |
+          git fetch origin
+          git checkout dev
+          git reset --hard origin/dev
+
+      - name: Create failure branch
+        run: |
+          failure_branch="failure/$(date +%s)"
+          git checkout -b $failure_branch
+          git push origin $failure_branch
