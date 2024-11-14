@@ -49,13 +49,6 @@ jobs:
           git pull origin master --rebase  # Réalisez un rebase pour garantir que master est à jour avant la fusion
           git merge dev --allow-unrelated-histories || (echo "Merge failed, investigating"; exit 1)
 
-      - name: Ensure master is up-to-date before pushing
-        run: |
-          git fetch origin
-          git checkout master
-          git pull origin master --rebase  # Réalise un rebase pour éviter les merges inutiles
-          git push origin master
-
   failure-recovery:
     runs-on: ubuntu-latest
     needs: dev-branches
