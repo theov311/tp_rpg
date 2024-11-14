@@ -34,12 +34,20 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
+      - name: Fetch all branches
+        run: |
+          git fetch --all  # Assurez-vous que toutes les branches sont à jour
+
+      - name: Show branch status
+        run: |
+          git status  # Vérifiez l'état actuel des branches
+          git log --oneline --graph --decorate  # Visualisez l'historique des commits
+
       - name: Fast-forward master branch
         run: |
-          git fetch origin
           git checkout master
-          git merge dev --allow-unrelated-histories  # Permet de fusionner les branches même avec des historiques différents
-          git push origin master
+          git pull origin master --rebase  # Réalisez un rebase pour garantir que master est à jour avant la fusion
+          git merge dev --allow-unrelated-histories || (echo "Merge failed, investigating"; exit 1)
 
       - name: Ensure master is up-to-date before pushing
         run: |
@@ -55,6 +63,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Log error information
+        run: |
+          echo "CI pipeline failed. Checking last 10 commits."
+          git log -n 10 --oneline  # Affiche les derniers commits pour mieux comprendre la situation
 
       - name: Ensure dev branch is up to date
         run: |
