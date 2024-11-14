@@ -18,11 +18,8 @@ jobs:
           python-version: '3.x'
 
       - name: Run tests
-        id: run_tests
         run: |
-          python -m unittest discover -s tests -v || echo "Tests failed" && echo "TESTS_FAILED=true" >> $GITHUB_ENV
-          # Si les tests échouent, cela ne fera pas échouer dev-branch, mais enregistre l'échec dans une variable d'environnement.
-
+          python -m unittest discover -s tests -v
 
   merge-to-master:
     runs-on: ubuntu-latest
@@ -55,7 +52,7 @@ jobs:
   failure-recovery:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: env.TESTS_FAILED == 'true'  # Vérifie si la variable indique un échec de test
+    if: ${{ failure() }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -63,18 +60,16 @@ jobs:
       - name: Log error information
         run: |
           echo "CI pipeline failed. Checking last 10 commits."
-          git log -n 10 --oneline  # Affiche les derniers commits pour diagnostic
+          git log -n 10 --oneline  # Affiche les derniers commits pour mieux comprendre la situation
 
-      - name: Fetch and reset dev branch
+      - name: Ensure dev branch is up to date
         run: |
           git fetch origin
           git checkout dev
-          git reset --hard HEAD~1  # Annule le dernier commit fautif dans la branche dev
-          git push origin dev --force  # Met à jour dev sans le commit fautif
+          git reset --hard origin/dev
 
-      - name: Create failure branch with removed commit
+      - name: Create failure branch
         run: |
-          unique_id=$(date +%s)
-          failure_branch="failures/${unique_id}"  # Crée un nom unique pour la branche d'échec
-          git checkout -b $failure_branch HEAD@{1}  # Place le dernier commit annulé sur cette branche
-          git push origin $failure_branch  # Pousse la branche failures/<numéro_unique> sur le dépôt distant
+          failure_branch="failure/$(date +%s)"
+          git checkout -b $failure_branch
+          git push origin $failure_branch
