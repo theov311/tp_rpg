@@ -8,8 +8,6 @@ on:
 jobs:
   dev-branch:
     runs-on: ubuntu-latest
-    outputs:
-      test_result: ${{ steps.set-result.outputs.test_result }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -20,24 +18,14 @@ jobs:
           python-version: '3.x'
 
       - name: Run tests
-        id: test
+        id: tests
         run: |
           python -m unittest discover -s tests -v
-
-      - name: Set test result output
-        id: set-result
-        run: |
-          if [ "${{ steps.test.outcome }}" == "success" ]; then
-            echo "test_result=success" >> $GITHUB_ENV
-          else
-            echo "test_result=failure" >> $GITHUB_ENV
-        env:
-          test_result: ${{ steps.test.outcome }}
 
   merge-to-master:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: ${{ needs.dev-branch.outputs.test_result == 'success' }}
+    if: ${{ needs.dev-branch.result == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -57,19 +45,16 @@ jobs:
   failure-recovery:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: ${{ needs.dev-branch.outputs.test_result == 'failure' }}
+    if: ${{ needs.dev-branch.result == 'failure' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Reset dev branch to previous commit
+      - name: Create failure branch
         run: |
           git fetch origin
           git checkout dev
-          git reset --hard HEAD~1
-
-      - name: Create failure branch
-        run: |
+          git reset --hard HEAD~1  # Annule le dernier commit de la branche dev
           failure_branch="failure/$(date +%s)"
           git checkout -b $failure_branch
           git push origin $failure_branch
