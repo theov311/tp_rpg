@@ -5,9 +5,6 @@ on:
     branches:
       - dev
 
-permissions:
-  contents: write
-
 jobs:
   dev-branch:
     runs-on: ubuntu-latest
@@ -21,13 +18,14 @@ jobs:
           python-version: '3.x'
 
       - name: Run tests
+        id: tests
         run: |
           python -m unittest discover -s tests -v
 
   merge-to-master:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: ${{ success() }}
+    if: ${{ needs.dev-branch.result == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -37,44 +35,31 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-      - name: Update master branch
+      - name: Fast-forward master branch
         run: |
           git checkout master
-          git pull origin master
-
-      - name: Merge dev into master
-        run: |
-          git merge dev --no-edit || exit 1
-
-      - name: Push changes to master
-        run: git push origin master
+          git pull origin master --rebase
+          git merge dev --allow-unrelated-histories
+          git push origin master
 
   failure-recovery:
     runs-on: ubuntu-latest
-    needs: merge-to-master
-    if: ${{ failure() }}
+    needs: dev-branch
+    if: ${{ needs.dev-branch.result == 'failure' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Fetch all branches
-        run: git fetch origin
-
-      - name: Remove failing commit from dev and create failure branch
+      - name: Create failure branch
         run: |
-          # Identifiez le dernier commit échoué
-          failing_commit=$(git log -1 --pretty=format:%H)
-          
-          # Réinitialisez dev pour retirer ce commit
+          git fetch origin
           git checkout dev
-          git reset --hard HEAD~1
-          git push --force origin dev
-          
-          # Créez une branche pour le commit échoué
-          failure_branch="failures/$(date +%s)"
-          git checkout -b $failure_branch $failing_commit
+          git reset --hard HEAD~1  # Annule le dernier commit de la branche dev
+          failure_branch="failure/$(date +%s)"
+          git checkout -b $failure_branch
           git push origin $failure_branch
 
-      - name: Log information
+      - name: Log error information
         run: |
-          echo "Le commit $failing_commit a été déplacé vers la branche $failure_branch."
+          echo "Tests failed. Last 10 commits:"
+          git log -n 10 --oneline
