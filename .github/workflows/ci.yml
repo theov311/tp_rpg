@@ -9,7 +9,7 @@ jobs:
   dev-branch:
     runs-on: ubuntu-latest
     outputs:
-      test_result: ${{ steps.test-result.outputs.test_result }}
+      test_result: ${{ steps.test.outcome }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,11 +23,6 @@ jobs:
         id: test
         run: |
           python -m unittest discover -s tests -v
-
-      - name: Set test result
-        id: test-result
-        run: |
-          echo "test_result=${{ steps.test.outcome }}" >> $GITHUB_ENV
 
   merge-to-master:
     runs-on: ubuntu-latest
