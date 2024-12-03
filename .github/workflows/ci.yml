@@ -18,14 +18,20 @@ jobs:
           python-version: '3.x'
 
       - name: Run tests
-        id: tests
+        id: run-tests
         run: |
           python -m unittest discover -s tests -v
+      - name: Set output based on test result
+        if: failure()
+        run: echo "test_result=failure" >> $GITHUB_ENV
+      - name: Set output based on test success
+        if: success()
+        run: echo "test_result=success" >> $GITHUB_ENV
 
   merge-to-master:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: ${{ needs.dev-branch.result == 'success' }}
+    if: env.test_result == 'success'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -45,16 +51,19 @@ jobs:
   failure-recovery:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: ${{ needs.dev-branch.result == 'failure' }}
+    if: env.test_result == 'failure'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create failure branch
+      - name: Reset dev branch to previous commit
         run: |
           git fetch origin
           git checkout dev
-          git reset --hard HEAD~1  # Annule le dernier commit de la branche dev
+          git reset --hard HEAD~1
+
+      - name: Create failure branch
+        run: |
           failure_branch="failure/$(date +%s)"
           git checkout -b $failure_branch
           git push origin $failure_branch
