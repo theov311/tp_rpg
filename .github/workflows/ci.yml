@@ -9,7 +9,7 @@ jobs:
   dev-branch:
     runs-on: ubuntu-latest
     outputs:
-      test_result: ${{ steps.test.outcome }}
+      test_result: ${{ steps.test-result.outputs.test_result }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,6 +23,11 @@ jobs:
         id: test
         run: |
           python -m unittest discover -s tests -v
+
+      - name: Set test result
+        id: test-result
+        run: |
+          echo "test_result=${{ steps.test.outcome }}" >> $GITHUB_ENV
 
   merge-to-master:
     runs-on: ubuntu-latest
@@ -41,7 +46,12 @@ jobs:
         run: |
           git checkout master
           git pull origin master --rebase
-          git merge dev --allow-unrelated-histories
+          if ! git merge dev --allow-unrelated-histories; then
+            echo "Merge failed. Inspecting the details..."
+            git status
+            git log --oneline -n 10
+            exit 1
+          fi
           git push origin master
 
   failure-recovery:
