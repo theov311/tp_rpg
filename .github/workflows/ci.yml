@@ -8,6 +8,8 @@ on:
 jobs:
   dev-branch:
     runs-on: ubuntu-latest
+    outputs:
+      test_result: ${{ steps.test-result.outputs.test_result }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -18,14 +20,19 @@ jobs:
           python-version: '3.x'
 
       - name: Run tests
-        id: tests
+        id: test
         run: |
           python -m unittest discover -s tests -v
+
+      - name: Set test result
+        id: test-result
+        run: |
+          echo "test_result=${{ steps.test.outcome }}" >> $GITHUB_ENV
 
   merge-to-master:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: ${{ needs.dev-branch.result == 'success' }}
+    if: ${{ needs.dev-branch.outputs.test_result == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -45,21 +52,19 @@ jobs:
   failure-recovery:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: ${{ needs.dev-branch.result == 'failure' }}
+    if: ${{ needs.dev-branch.outputs.test_result == 'failure' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create failure branch
+      - name: Reset dev branch
         run: |
           git fetch origin
           git checkout dev
-          git reset --hard HEAD~1  # Annule le dernier commit de la branche dev
+          git reset --hard HEAD~1
+
+      - name: Create failure branch
+        run: |
           failure_branch="failure/$(date +%s)"
           git checkout -b $failure_branch
           git push origin $failure_branch
-
-      - name: Log error information
-        run: |
-          echo "Tests failed. Last 10 commits:"
-          git log -n 10 --oneline
