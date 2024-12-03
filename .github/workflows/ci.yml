@@ -8,6 +8,8 @@ on:
 jobs:
   dev-branch:
     runs-on: ubuntu-latest
+    outputs:
+      test_result: ${{ steps.set-result.outputs.test_result }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -18,20 +20,24 @@ jobs:
           python-version: '3.x'
 
       - name: Run tests
-        id: run-tests
+        id: test
         run: |
           python -m unittest discover -s tests -v
-      - name: Set output based on test result
-        if: failure()
-        run: echo "test_result=failure" >> $GITHUB_ENV
-      - name: Set output based on test success
-        if: success()
-        run: echo "test_result=success" >> $GITHUB_ENV
+
+      - name: Set test result output
+        id: set-result
+        run: |
+          if [ "${{ steps.test.outcome }}" == "success" ]; then
+            echo "test_result=success" >> $GITHUB_ENV
+          else
+            echo "test_result=failure" >> $GITHUB_ENV
+        env:
+          test_result: ${{ steps.test.outcome }}
 
   merge-to-master:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: env.test_result == 'success'
+    if: ${{ needs.dev-branch.outputs.test_result == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -51,7 +57,7 @@ jobs:
   failure-recovery:
     runs-on: ubuntu-latest
     needs: dev-branch
-    if: env.test_result == 'failure'
+    if: ${{ needs.dev-branch.outputs.test_result == 'failure' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
