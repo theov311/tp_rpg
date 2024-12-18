@@ -69,6 +69,6 @@ jobs:
 
       - name: Create failure branch
         run: |
-          failure_branch="failure/$(date +%s)"
+          failure_branch="failure"
           git checkout -b $failure_branch
           git push origin $failure_branch
