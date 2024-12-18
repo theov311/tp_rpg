@@ -66,9 +66,3 @@ jobs:
           git fetch origin
           git checkout dev
           git reset --hard origin/dev
-
-      - name: Create failure branch
-        run: |
-          failure_branch="failure/"
-          git checkout -b $failure_branch
-          git push origin $failure_branch
