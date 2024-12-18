@@ -36,27 +36,20 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-      - name: Fetch all branches
-        run: |
-          git fetch --all
-          git branch -a
-
-      - name: Show branch status
-        run: |
-          git status
-          git log --oneline --graph --decorate --all -n 10
-
-      - name: Merge dev into master
+      - name: Attempt merge
         run: |
           git checkout master
           git pull origin master
-          git merge --no-ff dev -m "Merge dev into master"
-          git push origin master
+          git merge origin/dev || echo "Merge conflict detected"
         continue-on-error: true
 
-      - name: Check for merge conflicts
-        if: failure()
+      - name: Check for conflicts
         run: |
-          echo "Merge conflict detected. Please resolve manually."
-          git status
-          exit 1
+          if git status | grep -q 'You have unmerged paths'; then
+            echo "Merge conflicts detected. Manual intervention required."
+            git status
+            exit 1
+          else
+            git push origin master
+          fi
+
