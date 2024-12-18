@@ -17,6 +17,10 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
       - name: Run tests
         run: |
           python -m unittest discover -s tests -v
@@ -65,9 +69,9 @@ jobs:
         run: |
           git fetch --all  # Assurez-vous que toutes les branches sont à jour
 
-      - name: Ensure dev branch is up to date
+      - name: Save failed commit to 'failure' branch
         run: |
-          git fetch origin
-          git checkout dev
-          git pull origin failure --rebase
-          git reset --hard origin/dev
+          git checkout -b failure || git checkout failure  # Crée ou accède à la branche 'failure'
+          git merge dev --no-commit || true  # Fusionne sans commit pour ne pas briser la branche 'failure'
+          git commit -am "Save failed state from dev branch" || true  # Effectue un commit avec un message descriptif
+          git push origin failure  # Pousse les modifications dans la branche 'failure'
