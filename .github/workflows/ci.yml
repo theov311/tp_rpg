@@ -69,9 +69,13 @@ jobs:
         run: |
           git fetch --all  # Assurez-vous que toutes les branches sont à jour
 
+      - name: Ensure the 'failure' branch is up-to-date
+        run: |
+          git checkout failure || git checkout -b failure  # Crée ou accède à la branche 'failure'
+          git pull origin failure --rebase  # Intègre les changements distants avant de continuer
+
       - name: Save failed commit to 'failure' branch
         run: |
-          git checkout -b failure || git checkout failure  # Crée ou accède à la branche 'failure'
           git merge dev --no-commit || true  # Fusionne sans commit pour ne pas briser la branche 'failure'
           git commit -am "Save failed state from dev branch" || true  # Effectue un commit avec un message descriptif
           git push origin failure  # Pousse les modifications dans la branche 'failure'
