@@ -56,13 +56,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Log error information
+      - name: Set Git user name and email
         run: |
-          echo "CI pipeline failed. Checking last 10 commits."
-          git log -n 10 --oneline  # Affiche les derniers commits pour mieux comprendre la situation
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Fetch all branches
+        run: |
+          git fetch --all  # Assurez-vous que toutes les branches sont à jour
 
       - name: Ensure dev branch is up to date
         run: |
           git fetch origin
           git checkout dev
+          git pull origin failure --rebase  # Réalisez un rebase pour garantir que master est à jour avant la fusion
           git reset --hard origin/dev
