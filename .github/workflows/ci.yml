@@ -41,8 +41,7 @@ jobs:
       - name: Show branch status
         run: |
           git status  # Vérifiez l'état actuel des branches
-          git log --oneline --graph --decorate  # Visualisez l'historique des commits
-
+          git log --oneline --graph --decorate 
       - name: Fast-forward master branch
         run: |
           git checkout master
