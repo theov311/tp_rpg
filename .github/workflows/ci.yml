@@ -24,7 +24,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest test/test.py --verbose
+          pytest tests/test.py --verbose
 
   merge-to-master:
     runs-on: ubuntu-latest
