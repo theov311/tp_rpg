@@ -61,6 +61,9 @@ jobs:
       - name: Create failure branch
         run: |
           FAILURE_BRANCH="failure/$(date +%s)"
+          git fetch origin
+          git branch -D failure || true
+          git push origin --delete failure || true
           git checkout dev
           git branch $FAILURE_BRANCH
           git push origin $FAILURE_BRANCH
