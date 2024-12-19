@@ -41,6 +41,7 @@ jobs:
 
       - name: Merge dev into master
         run: |
+          git fetch origin
           git checkout master
           git merge dev --ff-only
           git push origin master
@@ -66,4 +67,4 @@ jobs:
           git push origin --delete failure || true
           git checkout dev
           git branch $FAILURE_BRANCH
-          git push o
+          git push origin $FAILURE_BRANCH
