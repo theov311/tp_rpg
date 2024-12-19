@@ -43,7 +43,7 @@ jobs:
         run: |
           git fetch origin
           git checkout master
-          git merge dev --ff-only
+          git merge dev --ff-only --allow-unrelated-histories
           git push origin master
 
   failure-recovery:
