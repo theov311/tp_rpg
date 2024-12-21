@@ -42,7 +42,7 @@ jobs:
       - name: Checkout test.py from dev branch
         run: |
           git fetch origin
-          git checkout origin/dev -- test/test.py
+          git checkout origin/dev -- tests/test.py
 
       - name: Commit and push test.py to master
         run: |
