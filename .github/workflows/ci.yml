@@ -46,9 +46,11 @@ jobs:
 
       - name: Commit and push test.py to master
         run: |
+          git checkout master
+          git checkout dev -- tests/test.py
           git add tests/test.py
-          git commit -m "Merge test.py from dev to master"
-          git push origin dev:master --force
+          git commit -m "Sync test.py from dev to master"
+          git push origin master
 
   failure-recovery:
     runs-on: ubuntu-latest
