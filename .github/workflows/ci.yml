@@ -47,7 +47,7 @@ jobs:
       - name: Commit and push test.py to master
         run: |
           git add tests/test.py
-          git commit -m "Merge test.py from dev to master"
+          git commit --allow-empty -m "Merge test.py from dev to master"
           git push origin master
 
   failure-recovery:
