@@ -46,7 +46,7 @@ jobs:
 
       - name: Commit and push test.py to master
         run: |
-          git add test/test.py
+          git add tests/test.py
           git commit -m "Merge test.py from dev to master"
           git push origin master
 
